@@ -1,12 +1,12 @@
-import { User } from "../models/user.model";
-import {sign} from "jsonwebtoken"
+import { User } from "../models/user.model.js";
+import jwt from "jsonwebtoken"
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 
 const createToken = (email, userId) =>{
-    return sign({email, userId}, process.env.JWT_KEY, {expiresIn: maxAge})
+    return jwt.sign({email, userId}, process.env.JWT_KEY, {expiresIn: maxAge})
 }
 
-export const signup = async(request, response, next)=>{
+const signup = async(request, response, next)=>{
    try{
       const {email, password} = request.body;
       if(!email || !password){
@@ -33,3 +33,5 @@ export const signup = async(request, response, next)=>{
     return response.status(500).send("Internal Server Error");
    }
 };
+
+export {signup}
