@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 const Auth = () => {
     
@@ -11,11 +12,30 @@ const Auth = () => {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     
+    const validateSignup = ()=>{
+        if(!email.length){
+            toast.error("Email is required.");
+            return false;
+        }
+        if(!password.length){
+            toast.error("Password is required.");
+            return false;
+        }
+        if(password!==confirmPassword){
+            toast.error("Password and confirm password should be same.");
+            return false
+        }
+
+        return true;
+    }
+
     const handleLogin= async () => {
       
     };
     const handleSignup = async () => {
-     
+      if(validateSignup()){
+        alert("Done");
+      }
     };
 
   return (
