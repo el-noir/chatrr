@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@radix-ui/react-tabs';
 import { useState } from 'react';
 import { toast } from 'sonner';
-
+import apiClient from '@/lib/api.client'
+import { SIGNUP_ROUTE } from '@/utils/constants';
 const Auth = () => {
     
     const [email, setEmail] = useState("")
@@ -33,10 +34,16 @@ const Auth = () => {
       
     };
     const handleSignup = async () => {
-      if(validateSignup()){
-        alert("Done");
-      }
-    };
+        if (validateSignup()) {
+          try {
+            const response = await apiClient.post(SIGNUP_ROUTE, { email, password });
+            console.log({ response });
+          } catch (error) {
+            console.error("Signup failed:", error);
+            toast.error("Signup failed. Please try again.");
+          }
+        }
+      };
 
   return (
     <div className="h-[100vh] w-full flex items-center justify-center bg-gray-100">

@@ -2,13 +2,17 @@ import express, {urlencoded} from "express"
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import authRoutes from "./routes/auth.route.js";
+import morgan from 'morgan'
+
 const app = express();
 
+app.use(morgan('dev'));
+
 app.use(cors({
-    origin: [process.env.ORIGIN],
+    origin: '*', // or origin: true
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials:true,
-}))
+    credentials: true,
+}));
 app.use(express.json({
     limit: '16kb',
 }));
@@ -24,6 +28,6 @@ app.use(cookieParser(
     
 ));
 
-app.use('/api/v1/auth',authRoutes);
+app.use('/api/auth',authRoutes);
 
 export {app}
