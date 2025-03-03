@@ -1,39 +1,37 @@
 import { User } from "../models/user.model.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import { ApiErr } from "../utils/ApiError.js";
+import { ApiRes } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 
-const createToken = (email, userId) =>{
-    return jwt.sign({email, userId}, process.env.JWT_KEY, {expiresIn: maxAge})
-}
+const createToken = (email, userId) => {
+    return jwt.sign({ email, userId }, process.env.JWT_KEY, { expiresIn: maxAge });
+};
 
-const signup = async (request, response, next) => {
-    try {
-       const { email, password } = request.body;
-       if (!email || !password) {
-         return response.status(400).json({ error: "Email and Password are required." });
-       }
- 
-       const user = await User.create({ email, password });
- 
-       response.cookie("jwt", createToken(email, user.id), {
-         maxAge,
-         secure: true,
-         sameSite: "None",
-       });
- 
-       return response.status(201).json({
-         user: {
-             id: user.id,
-             email: user.email,
-             profileSetup: user.profileSetup,
-         },
-       });
- 
-    } catch (error) {
-       console.log({ error });
-       return response.status(500).json({ error: "Internal Server Error" });
+const signup = asyncHandler(async (req, res, next) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return next(new ApiErr(400, "Email and Password are required."));
     }
- };
- 
 
-export {signup}
+    try {
+        const user = await User.create({ email, password });
+
+        res.cookie("jwt", createToken(email, user.id), {
+            maxAge,
+            secure: true,
+            sameSite: "None",
+        });
+
+        return res
+            .status(201)
+            .json(new ApiRes(201, { id: user.id, email: user.email, profileSetup: user.profileSetup }, "User created successfully"));
+    } catch (error) {
+        return next(new ApiErr(500, "Internal Server Error", [error.message]));
+    }
+});
+
+export { signup };
