@@ -7,8 +7,12 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import apiClient from '@/lib/api.client'
 import { LOGIN_ROUTE, SIGNUP_ROUTE } from '@/utils/constants';
+import {useNavigate} from "react-router-dom"
+import { useAppStore } from '@/store';
+
 const Auth = () => {
-    
+    const navigate =useNavigate()
+     const {setUserInfo} = useAppStore();
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
@@ -53,7 +57,19 @@ const Auth = () => {
       if (validateLogin()) {
           try {
               const response = await apiClient.post(LOGIN_ROUTE, { email, password });
-              console.log({ response }); // Move this inside the if block
+              console.log("API Response:", response.data); // Log the full response
+  
+              // Check if the response contains the expected data
+              if (response.data.success && response.data.data?.user?.id) {
+                  setUserInfo(response.data.data.user); // Update user info in the store
+                  if (response.data.data.user.profileSetup) {
+                      navigate("/chat"); // Navigate to chat if profile is set up
+                  } else {
+                      navigate("/profile"); // Navigate to profile setup otherwise
+                  }
+              } else {
+                  toast.error("Invalid response from server.");
+              }
           } catch (error) {
               console.error("Login failed:", error);
               toast.error("Login failed. Please try again.");
@@ -66,6 +82,10 @@ const Auth = () => {
           try {
             const response = await apiClient.post(SIGNUP_ROUTE, { email, password });
             console.log({ response });
+            if(response.status==201){
+              setUserInfo(response.data.user)
+              navigate("/profile");
+            }
           } catch (error) {
             console.error("Signup failed:", error);
             toast.error("Signup failed. Please try again.");
@@ -89,7 +109,7 @@ const Auth = () => {
 
           {/* Tabs */}
           <div className="w-full flex justify-center">
-            <Tabs className="w-3/4">
+            <Tabs className="w-3/4" default="login">
               <TabsList className="flex w-full border-b">
                 <TabsTrigger value="login" className="w-1/2 text-center py-3 border-b-2 transition-all data-[state=active]:border-purple-500 data-[state=active]:font-semibold">
                   Login
