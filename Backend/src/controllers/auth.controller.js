@@ -4,6 +4,7 @@ import { ApiErr } from "../utils/ApiError.js";
 import { ApiRes } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import bcrypt from "bcryptjs";
+import { request } from "express";
 
 const maxAge = 3 * 24 * 60 * 60 * 1000;
 
@@ -68,5 +69,21 @@ const login = asyncHandler(async (req, res, next) => {
   }
 });
 
+const getUserInfo = asyncHandler(async (req, res, next) => {
+   
+  try{
+    const userData = await User.findById(req.userId);
 
-export { signup, login };
+    if(!userData){
+        return new ApiErr(404, "User with given id not found");
+    }
+        return res
+            .status(200)
+            .json(new ApiRes(200, { id: userData.id, email: userData.email, profileSetup: userData.profileSetup, firstName: userData.firstName, lastName: userData.lastName, image: userData.image, color: userData.color }, "Login Successfully"));
+    } catch (error) {
+        return next(new ApiErr(500, "Internal Server Error", [error.message]));
+    }
+  });
+  
+
+export { signup, login, getUserInfo };
