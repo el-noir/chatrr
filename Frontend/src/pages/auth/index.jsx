@@ -60,16 +60,17 @@ const Auth = () => {
               console.log("API Response:", response.data); // Log the full response
   
               // Check if the response contains the expected data
-              if (response.data.success && response.data.data?.user?.id) {
-                  setUserInfo(response.data.data.user); // Update user info in the store
-                  if (response.data.data.user.profileSetup) {
-                      navigate("/chat"); // Navigate to chat if profile is set up
-                  } else {
-                      navigate("/profile"); // Navigate to profile setup otherwise
-                  }
-              } else {
-                  toast.error("Invalid response from server.");
-              }
+              if (response.data.success && response.data.data?.id) {
+                setUserInfo(response.data.data); // Fix: set the whole `data` instead of `user`
+                if (response.data.data.profileSetup) {
+                    navigate("/chat");
+                } else {
+                    navigate("/profile");
+                }
+            } else {
+                toast.error("Invalid response from server.");
+            }
+            
           } catch (error) {
               console.error("Login failed:", error);
               toast.error("Login failed. Please try again.");
